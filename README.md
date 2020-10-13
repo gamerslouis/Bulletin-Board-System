@@ -14,7 +14,9 @@
 	pip3 install boto3
 	```
 
-+ Red
++ Redis required
+    + default server: 10.0.8.1:6379
+    + 可更改client/command/Subscribe.py
 
 + Runclient
 	```
