@@ -19,7 +19,7 @@ class CreateBoard(LoginRequireMixin, CommandBase):
             Board.create(name=args[0], user=self.user)
             self.write('Create board successfully.')
         except BoardAlreadyExistException:
-            self.write('Board is already exist.')
+            self.write('Board already exist.')
 
 
 class CreatePost(LoginRequireMixin, CommandBase):
@@ -36,7 +36,7 @@ class CreatePost(LoginRequireMixin, CommandBase):
         try:
             board = Board.get('name', bname)
         except ObjectNotExist:
-            self.write('Board is not exist.')
+            self.write('Board does not exist.')
             return
 
         content = content.replace('<br>', '\n')
@@ -82,7 +82,7 @@ class ListPost(CommandBase):
         try:
             board = Board.get('name', bname)
         except ObjectNotExist:
-            self.write('Board is not exist.')
+            self.write('Board does not exist.')
             return
 
         if key == '':
@@ -106,7 +106,7 @@ class Read(CommandBase):
         try:
             p = Post.get('id', args[0])
         except ObjectNotExist:
-            self.write('Post is not exist.')
+            self.write('Post does not exist.')
             return
 
         date = datetime.strptime(p.create_date, '%Y-%m-%d %H:%M:%S')
@@ -135,7 +135,7 @@ class DeletePost(LoginRequireMixin, CommandBase):
         try:
             p = Post.get('id', args[0])
         except ObjectNotExist:
-            self.write('Post is not exist.')
+            self.write('Post does not exist.')
             return
 
         if p.author_id != self.user.id:
@@ -156,7 +156,7 @@ class UpdatePost(LoginRequireMixin, CommandBase):
         try:
             p = Post.get('id', args[0])
         except ObjectNotExist:
-            self.write('Post is not exist.')
+            self.write('Post does not exist.')
             return
 
         if p.author_id != self.user.id:
@@ -184,7 +184,7 @@ class Do_Comment(LoginRequireMixin, CommandBase):
         try:
             p = Post.get('id', args[0])
         except ObjectNotExist:
-            self.write('Post is not exist.')
+            self.write('Post does not exist.')
             return
 
         Comment.create(p, self.user, content)
