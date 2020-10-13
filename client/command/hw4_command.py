@@ -37,8 +37,32 @@ class Unsubscribe(CommandBase):
 class ListSub(JsonOrPrintOutMixin, CommandBase):
     def handleResponse(self, res, *args, **kwargs):
         subs = res['subs']
-        for sub in subs:
-            print('{}: {}: {}'.format(sub['type'], sub['name'], sub['keyword']))
+        parsed = {}
+        for t in ['author', 'board']:
+            parsed[t] = []
+        for r in subs:
+            parsed[r['type']].append(r)
+        for t in ['author', 'board']:
+            if len(parsed[t]) == 0:
+                continue
+            names = list(set([r['name'] for r in parsed[t]]))
+            names.sort()
+            print('{}: '.format(t.capitalize()), end='')
+            for idx, name in enumerate(names):
+                print('{}: '.format(name), end='')
+                fl = list(filter(lambda i: i['name'] == name, parsed[t]))
+                for idx2, r in enumerate(fl):
+                    if idx2 != len(fl)-1:
+                        print('{}, '.format(r['keyword']), end='')
+                    else:
+                        print(r['keyword'], end='')
+                if idx != len(names)-1:
+                    print('; ', end='')
+                else:
+                    print('')
+
+        # for sub in subs:
+        #     print('{}: {}: {}'.format(sub['type'], sub['name'], sub['keyword']))
 
 
 class Debug(CommandBase):
@@ -46,7 +70,7 @@ class Debug(CommandBase):
         code.interact(local=locals())
 
 
-register(Subscribe)
+register(Subscribe, 'subscribe')
 register(Unsubscribe)
 register(ListSub, 'list-sub')
 register(Debug)

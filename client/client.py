@@ -1,5 +1,5 @@
 from command import commands
-# from command import Subscribe
+from command import Subscribe
 
 
 class Client(object):
@@ -7,8 +7,8 @@ class Client(object):
         self.context = {}
         self.context['sock'] = sock
         self.context['s3'] = s3
-        # self.context['sub_p'] = Subscribe.Producer()
-        # self.context['sub_c'] = Subscribe.Consumer()
+        self.context['sub_p'] = Subscribe.Producer()
+        self.context['sub_c'] = Subscribe.Consumer()
 
     def exec(self):
         print('********************************')

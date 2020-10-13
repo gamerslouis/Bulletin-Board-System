@@ -42,7 +42,7 @@ class Unsubscribe(LoginRequireMixin, CommandBase):
 
     def exec(self, *args, **kwargs):
         board = kwargs.get('board', '')
-        author = kwargs.get('board', '')
+        author = kwargs.get('author', '')
         if board == ''and author == '':
             raise BadArgsException
 

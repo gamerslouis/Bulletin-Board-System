@@ -24,11 +24,11 @@ class login(S3Mixin, CommandBase):
             return
 
         self.context['user'] = args[0]
-        # self.context['sub_p'].username = args[0]
-        # res = self.send('list-sub')
-        # subs = json.loads(res)['subs']
-        # self.context['sub_c'].subs = subs
-        # self.context['sub_c'].run()
+        self.context['sub_p'].username = args[0]
+        res = self.send('list-sub')
+        subs = json.loads(res)['subs']
+        self.context['sub_c'].subs = subs
+        self.context['sub_c'].run()
 
         print('Welcome, {}.'.format(args[0]))
 
@@ -43,7 +43,7 @@ class logout(CommandBase):
             
         user = self.context['user']
         del self.context['user']
-        # self.context['sub_c'].stop()
+        self.context['sub_c'].stop()
 
         print('Bye, {}.'.format(user))
 

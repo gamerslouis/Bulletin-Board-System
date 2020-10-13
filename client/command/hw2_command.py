@@ -19,7 +19,7 @@ class ListPost(JsonOrPrintOutMixin, CommandBase):
 class CreatePost(S3Mixin, JsonOrPrintOutMixin, CommandBase):
     def handleResponse(self, res, *args, **kwargs):
         self.s3.create_object(self.username, res['uuid'], {'content': res['content']})
-        # self.context['sub_p'].new_post(args[0], kwargs['title'])
+        self.context['sub_p'].new_post(args[0], kwargs['title'])
         print('Create post successfully.')
 
 
