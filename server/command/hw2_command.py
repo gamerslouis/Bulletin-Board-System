@@ -7,6 +7,8 @@ from models.comment import Comment
 from models.ModelBase import ObjectNotExist, ObjectExistMoreThenOne
 from core.exception import BadArgsException
 from datetime import datetime
+from util import gen_uuid
+import json
 
 
 class CreateBoard(LoginRequireMixin, CommandBase):
@@ -39,10 +41,14 @@ class CreatePost(LoginRequireMixin, CommandBase):
             self.write('Board does not exist.')
             return
 
+        uuid = 'post-{}'.format(gen_uuid())
         content = content.replace('<br>', '\n')
 
-        Post.create(board.id, title, content, self.user)
-        self.write('Create post successfully.')
+        Post.create(board.id, title, uuid, self.user)
+        self.write(json.dumps({
+            'uuid': uuid,
+            'content': content
+        }))
 
 
 class ListBoard(CommandBase):
@@ -57,10 +63,14 @@ class ListBoard(CommandBase):
         else:
             raise BadArgsException
 
-        self.write('Index\tName\tModerator')
+        msg = 'Index\tName\tModerator\n'
+
         for i, b in enumerate(boards):
-            self.write('{}\t{}\t{}'.format(i+1, b.name, User.get(
-                'id', b.moderator_id).username))
+            msg += '{}\t{}\t{}\n'.format(i+1, b.name, User.get(
+                'id', b.moderator_id).username)
+        self.write(json.dumps({
+            'msg': msg
+        }))
 
 
 class ListPost(CommandBase):
@@ -89,11 +99,17 @@ class ListPost(CommandBase):
             posts = Post.getall()
         else:
             posts = Post.getmany('title', '%{}%'.format(key), True)
-        self.write('ID\tTitle\tAuthor\tDate')
+
+        posts = filter(lambda p: p.bid == board.id, posts)
+
+        msg = 'ID\tTitle\tAuthor\tDate\n'
         for p in posts:
-            date = datetime.strptime(p.create_date, '%Y-%m-%d %H:%M:%S')
-            self.write('{}\t{}\t{}\t{}'.format(p.id, p.title, User.get(
-                'id', p.author_id).username, date.strftime('%m/%d')))
+            msg += '{}\t{}\t{}\t{}\n'.format(p.id, p.title, User.get(
+                'id', p.author_id).username, p.create_date.strftime('%m/%d'))
+
+        self.write(json.dumps({
+            'msg': msg
+        }))
 
 
 class Read(CommandBase):
@@ -109,20 +125,20 @@ class Read(CommandBase):
             self.write('Post does not exist.')
             return
 
-        date = datetime.strptime(p.create_date, '%Y-%m-%d %H:%M:%S')
-
-        self.write('Author\t:{}'.format(User.get('id', p.author_id).username))
-        self.write('Title\t:{}'.format(p.title))
-        self.write('Date\t:{}'.format(date.strftime('%Y-%m-%d')))
-        self.write('--')
-        self.write(p.content)
-        self.write('--')
-
         comments = Comment.getmany('post_id', p.id)
 
-        for c in comments:
-            self.write('{}: {}'.format(
-                User.get('id', c.author_id).username, c.content))
+        self.write(json.dumps({
+            'auther_name': User.get('id', p.author_id).username,
+            'title': p.title,
+            'date': p.create_date.strftime('%Y-%m-%d'),
+            'uuid': p.uuid,
+            'comments': [
+                {
+                    'uuid': c.uuid,
+                    'author_name': User.get('id', c.author_id).username
+                } for c in comments
+            ]
+        }))
 
 
 class DeletePost(LoginRequireMixin, CommandBase):
@@ -143,7 +159,12 @@ class DeletePost(LoginRequireMixin, CommandBase):
             return
 
         p.delete()
-        self.write('Delete successfully.')
+        comments = Comment.getmany('post_id', p.id)
+
+        self.write(json.dumps({
+            'uuid': p.uuid,
+            'comments': [c.uuid for c in comments]
+        }))
 
 
 class UpdatePost(LoginRequireMixin, CommandBase):
@@ -166,9 +187,13 @@ class UpdatePost(LoginRequireMixin, CommandBase):
         if 'title' in kwargs:
             p.update('title', kwargs['title'])
         if 'content' in kwargs:
-            p.update('content', kwargs['content'])
-
-        self.write('Update successfully.')
+            self.write(json.dumps({
+                'username': User.get('id', p.author_id).username,
+                'uuid': p.uuid,
+                'content':  kwargs['content']
+            }))
+        else:
+            self.write('Update successfully.')
 
 
 class Do_Comment(LoginRequireMixin, CommandBase):
@@ -187,8 +212,16 @@ class Do_Comment(LoginRequireMixin, CommandBase):
             self.write('Post does not exist.')
             return
 
-        Comment.create(p, self.user, content)
-        self.write('Comment successfully.')
+        uuid = 'comment-{}'.format(gen_uuid())
+        username = User.get('id', p.author_id).username
+        Comment.create(p, self.user, uuid)
+
+        self.write(json.dumps({
+            'username': username,
+            'uuid': uuid,
+            'content': content
+        }))
+
 
 regist(CreateBoard, 'create-board')
 regist(CreatePost, 'create-post')
@@ -198,4 +231,3 @@ regist(Read, 'read')
 regist(DeletePost, 'delete-post')
 regist(UpdatePost, 'update-post')
 regist(Do_Comment, 'comment')
-regist(ListBoard, 'list-board')

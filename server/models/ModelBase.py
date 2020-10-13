@@ -42,6 +42,7 @@ class ModelBase(object):
     def delete(self):
         db.execute('delete from {} where id= ?'.format(
             self.__class__.__name__.lower()), (self.id,))
+        db.commit()
 
     def update(self, key, value):
         db.execute('update {} set {} = ? where id = {}'.format(

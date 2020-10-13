@@ -23,7 +23,7 @@ class login(CommandBase):
             return
         try:
             self.user = User.login(*args)
-            self.write('Welcome, {}.'.format(self.user.username))
+            self.write('Welcome.')
         except LoginFailException:
             self.write('Login failed.')
 
@@ -33,7 +33,7 @@ class logout(CommandBase):
         if self.user is None:
             self.write('Please login first.')
         else:
-            self.write('Bye, {}.'.format(self.user.username))
+            self.write('Bye, {}'.format(self.user.username))
             self.user = None
 
 

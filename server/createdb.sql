@@ -19,12 +19,31 @@ create table post(
     create_date datetime default (
         strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')
     ),
-    content text not null
+    uuid text
 );
 
 create table comment(
     id integer primary key AUTOINCREMENT,
     post_id integer,
     author_id integer,
-    content text
+    uuid text
 );
+
+create table mail(
+    id integer primary key AUTOINCREMENT,
+    receiver_id integer,
+    sender_id integer,
+    create_date datetime default (
+        strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')
+    ),
+    uuid text,
+    subject text
+);
+
+create table subscribe(
+    id integer primary key AUTOINCREMENT,
+    owner_id integer,
+    type text,
+    name text,
+    keyword text
+)

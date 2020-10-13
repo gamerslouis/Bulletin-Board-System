@@ -3,11 +3,6 @@ from core.database import close_db
 from core.exception import CloseConnect
 from command import commands
 
-welcome_message = '********************************\n' + \
-                  '** Welcome to the BBS server. **\n' + \
-                  '********************************\n'
-command_prev = '% '
-
 
 class ClientConnection(threading.Thread):
     def __init__(self, conn, addr):
@@ -29,10 +24,8 @@ class ClientConnection(threading.Thread):
         self.setup()
         print("New connection.")
         try:
-            self.conn.sendall(welcome_message.encode())
             while not self.disconnected:
                 try:
-                    self.conn.sendall(command_prev.encode())
                     command = self.getCommandLine()
                     if command:
                         self.exec(command)
